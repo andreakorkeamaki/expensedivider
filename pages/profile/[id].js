@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { getProfiles, getExpenses, createExpense } from '../../utils/supabaseApi';
+import { getProfiles, getExpenses, createExpense, deleteProfile } from '../../utils/supabaseApi';
 import AvatarUpload from '../../components/AvatarUpload';
 
 export default function ProfilePage() {
@@ -12,6 +12,8 @@ export default function ProfilePage() {
   const [description, setDesc] = useState('');
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -37,6 +39,22 @@ export default function ProfilePage() {
     }
   };
 
+  const handleDeleteProfile = async () => {
+    if (!id) return;
+    
+    setIsDeleting(true);
+    setError('');
+    
+    try {
+      await deleteProfile(id);
+      router.push('/');
+    } catch (err) {
+      setError('Errore durante eliminazione del profilo');
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
   if (loading) return <div className="min-h-screen flex items-center justify-center">Caricamento...</div>;
   if (!profile) return <div className="min-h-screen flex items-center justify-center text-red-500">Profilo non trovato</div>;
 
@@ -46,6 +64,36 @@ export default function ProfilePage() {
         <div className="flex flex-col items-center gap-2">
           <img src={profile.avatar_url || '/avatar1.png'} alt={profile.name} className="w-24 h-24 rounded-full object-cover border" />
           <h2 className="text-2xl font-bold">{profile.name}</h2>
+          <div className="flex gap-2 mt-2">
+            <button 
+              onClick={() => setShowDeleteConfirm(true)} 
+              className="px-3 py-1 bg-red-500 text-white text-sm rounded shadow hover:bg-red-600 transition"
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Eliminazione...' : 'Elimina profilo'}
+            </button>
+          </div>
+          {showDeleteConfirm && (
+            <div className="mt-2 p-3 border border-red-300 bg-red-50 rounded-lg text-center">
+              <p className="mb-2 text-red-700">Sei sicuro di voler eliminare questo profilo? Tutte le spese associate verranno eliminate.</p>
+              <div className="flex justify-center gap-3">
+                <button 
+                  onClick={() => setShowDeleteConfirm(false)} 
+                  className="px-3 py-1 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+                  disabled={isDeleting}
+                >
+                  Annulla
+                </button>
+                <button 
+                  onClick={handleDeleteProfile} 
+                  className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                  disabled={isDeleting}
+                >
+                  Conferma eliminazione
+                </button>
+              </div>
+            </div>
+          )}
         </div>
         <form onSubmit={handleAddExpense} className="flex flex-col gap-3">
           <input
