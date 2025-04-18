@@ -20,7 +20,7 @@ export default function ProfilePage() {
       setProfile(p);
     });
     getExpenses().then(list => {
-      setExpenses(list.filter(e => e.profile_id == id));
+      setExpenses(list.filter(e => e.paid_by == id));
     }).finally(() => setLoading(false));
   }, [id]);
 
@@ -28,7 +28,7 @@ export default function ProfilePage() {
     e.preventDefault();
     if (!description || !amount) return;
     try {
-      const exp = await createExpense({ description, amount: parseFloat(amount), profile_id: id, date: new Date().toISOString() });
+      const exp = await createExpense({ description, amount: parseFloat(amount), paid_by: id, date: new Date().toISOString() });
       setExpenses([exp, ...expenses]);
       setDesc('');
       setAmount('');
@@ -68,7 +68,7 @@ export default function ProfilePage() {
           />
           <button
             type="submit"
-            className="w-full py-2 rounded-xl bg-primary text-white font-bold text-lg shadow hover:bg-primary/90 transition"
+            className="w-full py-2 rounded-xl bg-blue-500 text-white font-bold text-lg shadow hover:bg-blue-600 transition"
           >
             Aggiungi spesa
           </button>
