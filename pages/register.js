@@ -3,11 +3,7 @@ import { useRouter } from 'next/router';
 import { signUp } from '../utils/supabaseApi';
 import Link from 'next/link';
 
-// Lista di email autorizzate a registrarsi
-const ALLOWED_EMAILS = [
-  'andrea@example.com',
-  'partner@example.com'
-];
+// Removed email restriction to allow any email
 
 export default function Register() {
   const router = useRouter();
@@ -24,11 +20,7 @@ export default function Register() {
       return;
     }
     
-    // Verifica se l'email è nella lista di quelle autorizzate
-    if (!ALLOWED_EMAILS.includes(email.toLowerCase())) {
-      setError('Email non autorizzata. Solo utenti specifici possono registrarsi.');
-      return;
-    }
+    // Email verification removed to allow any email
     
     setLoading(true);
     setError('');
@@ -38,7 +30,8 @@ export default function Register() {
       router.push('/login?registered=true');
     } catch (err) {
       console.error('Register error:', err);
-      setError('Errore durante la registrazione. Riprova più tardi.');
+      // Show detailed error message
+      setError(`Errore: ${err.message || 'Errore durante la registrazione'}`);
     } finally {
       setLoading(false);
     }
