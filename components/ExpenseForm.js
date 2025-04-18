@@ -9,7 +9,7 @@ const categories = [
 
 export default function ExpenseForm({ profile, addExpense }) {
   const [amount, setAmount] = useState('');
-  const [desc, setDesc] = useState('');
+  const [description, setDesc] = useState('');
   const [cat, setCat] = useState(categories[0].label);
   const [shared, setShared] = useState(true);
 
@@ -19,7 +19,7 @@ export default function ExpenseForm({ profile, addExpense }) {
     addExpense({
       id: Date.now(),
       amount: parseFloat(amount),
-      desc,
+      description,
       cat,
       shared,
       payer: profile,
@@ -42,7 +42,7 @@ export default function ExpenseForm({ profile, addExpense }) {
         />
         <TextField
           label="Descrizione"
-          value={desc}
+          value={description}
           onChange={e => setDesc(e.target.value)}
           required
         />

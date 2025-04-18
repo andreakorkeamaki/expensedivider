@@ -9,7 +9,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState(null);
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [desc, setDesc] = useState('');
+  const [description, setDesc] = useState('');
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
 
@@ -26,9 +26,9 @@ export default function ProfilePage() {
 
   const handleAddExpense = async (e) => {
     e.preventDefault();
-    if (!desc || !amount) return;
+    if (!description || !amount) return;
     try {
-      const exp = await createExpense({ desc, amount: parseFloat(amount), profile_id: id, date: new Date().toISOString() });
+      const exp = await createExpense({ description, amount: parseFloat(amount), profile_id: id, date: new Date().toISOString() });
       setExpenses([exp, ...expenses]);
       setDesc('');
       setAmount('');
@@ -51,7 +51,7 @@ export default function ProfilePage() {
           <input
             type="text"
             placeholder="Descrizione"
-            value={desc}
+            value={description}
             onChange={e => setDesc(e.target.value)}
             className="border rounded px-4 py-2 w-full focus:outline-none focus:ring focus:border-blue-400"
             required
@@ -79,7 +79,7 @@ export default function ProfilePage() {
           <ul className="flex flex-col gap-2">
             {expenses.map(e => (
               <li key={e.id} className="flex justify-between items-center bg-gray-100 rounded-lg px-3 py-2">
-                <span>{e.desc}</span>
+                <span>{e.description}</span>
                 <span className="font-bold">€ {e.amount.toFixed(2)}</span>
               </li>
             ))}

@@ -45,7 +45,7 @@ export default function Dashboard() {
           <ul className="flex flex-col gap-2 max-h-64 overflow-y-auto">
             {expenses.map(e => (
               <li key={e.id} className="flex justify-between items-center bg-gray-100 rounded-lg px-3 py-2">
-                <span>{e.desc}</span>
+                <span>{e.description}</span>
                 <span className="font-bold">€ {parseFloat(e.amount).toFixed(2)}</span>
               </li>
             ))}

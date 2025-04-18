@@ -16,7 +16,7 @@ export default function ExpenseList({ expenses }) {
           <ListItem key={e.id} divider>
             <Chip label={e.cat} sx={{ bgcolor: catColors[e.cat], mr: 2 }} />
             <ListItemText
-              primary={`${e.desc} (${e.shared ? 'Condivisa' : 'Personale'})`}
+              primary={`${e.description} (${e.shared ? 'Condivisa' : 'Personale'})`}
               secondary={`${e.payer} • ${new Date(e.date).toLocaleDateString()} • €${e.amount.toFixed(2)}`}
             />
           </ListItem>
