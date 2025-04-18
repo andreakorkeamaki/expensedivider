@@ -23,7 +23,21 @@ export default function SelectPartner() {
     async function loadData() {
       try {
         // Get the user's own profile
+        if (!user || !user.id) {
+          setError('Utente non trovato. Effettua nuovamente il login.');
+          router.push('/login');
+          return;
+        }
+        
         const profile = await getUserProfile(user.id);
+        console.log('Profilo utente:', profile);
+        
+        if (!profile) {
+          console.log('Nessun profilo trovato, reindirizzamento alla creazione del profilo');
+          router.push('/create-profile');
+          return;
+        }
+        
         setUserProfile(profile);
         
         // If user is already in a couple, go to dashboard
@@ -33,11 +47,21 @@ export default function SelectPartner() {
         }
         
         // Get available profiles (users who aren't in a couple)
-        const profilesData = await getProfiles(true); // true = only get profiles without couple_id
-        setProfiles(profilesData.filter(p => p.id !== profile?.id)); // Filter out own profile
+        try {
+          const profilesData = await getProfiles(true); // true = only get profiles without couple_id
+          console.log('Profili disponibili:', profilesData);
+          if (profile && profile.id) {
+            setProfiles(profilesData.filter(p => p.id !== profile.id)); // Filter out own profile
+          } else {
+            setProfiles(profilesData);
+          }
+        } catch (profilesError) {
+          console.error('Errore nel caricamento dei profili disponibili:', profilesError);
+          setError('Impossibile caricare i profili disponibili. Riprova più tardi.');
+        }
       } catch (error) {
-        console.error('Errore nel caricamento dei profili:', error);
-        setError('Impossibile caricare i profili. Riprova più tardi.');
+        console.error('Errore nel caricamento del profilo utente:', error);
+        setError('Impossibile caricare il tuo profilo. Riprova più tardi.');
       } finally {
         setLoading(false);
       }
@@ -47,6 +71,11 @@ export default function SelectPartner() {
   }, [user, router]);
 
   const handleSelectPartner = async (partnerId) => {
+    if (!userProfile || !userProfile.id) {
+      setError('Profilo utente non trovato. Ricarica la pagina e riprova.');
+      return;
+    }
+    
     try {
       setLoading(true);
       await createCoupleInvitation(userProfile.id, partnerId);
@@ -66,6 +95,11 @@ export default function SelectPartner() {
     
     if (!inviteEmail) {
       setError('Inserisci un indirizzo email');
+      return;
+    }
+    
+    if (!userProfile || !userProfile.id) {
+      setError('Profilo utente non trovato. Ricarica la pagina e riprova.');
       return;
     }
     
