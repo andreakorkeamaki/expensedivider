@@ -1,14 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { signIn } from '../utils/supabaseApi';
+import { signIn, getUser } from '../utils/supabaseApi';
+import { useAuth } from '../context/AuthContext';
 import Link from 'next/link';
 
 export default function Login() {
   const router = useRouter();
+  const { user, login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // Se l'utente è già autenticato, reindirizza alla dashboard
+  useEffect(() => {
+    if (user) {
+      router.push('/dashboard');
+    }
+  }, [user, router]);
+  
+  // Controlla se c'è un parametro di registrazione completata nell'URL
+  useEffect(() => {
+    if (router.query.registered === 'true') {
+      setError('Registrazione completata con successo. Ora puoi accedere.');
+    }
+  }, [router.query]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,11 +38,20 @@ export default function Login() {
     setError('');
     
     try {
-      await signIn(email, password);
-      router.push('/');
+      console.log('Attempting login with:', email);
+      const { user: authUser, session } = await signIn(email, password);
+      console.log('Login successful:', authUser, session);
+      
+      if (authUser) {
+        login(authUser); // Aggiorna il contesto di autenticazione
+        console.log('User set in auth context, redirecting...');
+        router.push('/dashboard');
+      } else {
+        setError('Login riuscito ma nessun utente restituito');
+      }
     } catch (err) {
       console.error('Login error:', err);
-      setError('Errore di accesso. Verifica email e password.');
+      setError(`Errore di accesso: ${err.message || 'Verifica email e password.'}`);
     } finally {
       setLoading(false);
     }
