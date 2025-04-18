@@ -49,14 +49,32 @@ export async function getProfiles(withoutCouple = false) {
 }
 
 export async function getUserProfile(userId) {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('user_id', userId)
-    .single();
+  console.log('Cercando profilo per userId:', userId);
   
-  if (error && error.code !== 'PGRST116') throw error; // PGRST116 è "No rows returned" - non è un errore in questo caso
-  return data || null;
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+    
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // PGRST116 è "No rows returned" - non è un errore in questo caso
+        console.log('Nessun profilo trovato per userId:', userId);
+        return null;
+      }
+      
+      console.error('Errore nel recupero del profilo:', error);
+      throw error;
+    }
+    
+    console.log('Profilo trovato:', data);
+    return data;
+  } catch (error) {
+    console.error('Eccezione durante getUserProfile:', error);
+    throw error;
+  }
 }
 
 export async function hasUserProfile(userId) {
@@ -65,20 +83,46 @@ export async function hasUserProfile(userId) {
 }
 
 export async function createProfile({ name, avatar_url, color, user_id }) {
-  // Verifica se l'utente ha già un profilo
-  const existingProfile = await getUserProfile(user_id);
-  if (existingProfile) {
-    throw new Error('Un profilo per questo utente esiste già');
-  }
+  console.log('Tentativo di creazione profilo con:', { name, avatar_url: avatar_url?.substring(0, 30) + '...', color, user_id });
   
-  const { data, error } = await supabase
-    .from('profiles')
-    .insert([{ name, avatar_url, color, user_id }])
-    .select()
-    .single();
+  // Verifica se l'utente ha già un profilo
+  try {
+    const existingProfile = await getUserProfile(user_id);
+    if (existingProfile) {
+      console.log('Profilo esistente trovato, impossibile crearne uno nuovo', existingProfile);
+      throw new Error('Un profilo per questo utente esiste già');
+    }
     
-  if (error) throw error;
-  return data;
+    console.log('Nessun profilo esistente trovato, procedendo con la creazione');
+    
+    // Verifica che tutti i dati necessari siano disponibili
+    if (!user_id) {
+      console.error('Errore: user_id mancante nella creazione del profilo');
+      throw new Error('ID utente mancante. Impossibile creare il profilo');
+    }
+    
+    if (!name) {
+      console.error('Errore: name mancante nella creazione del profilo');
+      throw new Error('Nome mancante. Impossibile creare il profilo');
+    }
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert([{ name, avatar_url, color, user_id }])
+      .select()
+      .single();
+      
+    if (error) {
+      console.error('Errore nell\'inserimento del profilo:', error);
+      throw error;
+    }
+    
+    console.log('Profilo creato con successo:', data);
+    return data;
+  } catch (error) {
+    console.error('Eccezione durante createProfile:', error);
+    throw error;
+  }
 }
 
 export async function updateProfile(id, updates) {

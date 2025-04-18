@@ -39,28 +39,52 @@ export default function CreateProfile() {
       setError('Carica una foto profilo');
       return;
     }
+
+    if (!user || !user.id) {
+      console.error('User ID mancante durante la creazione del profilo');
+      setError('Errore: sessione utente non valida. Prova a effettuare nuovamente il login.');
+      return;
+    }
     
     setLoading(true);
     setError('');
     
     try {
+      console.log('Inizio creazione profilo per user:', user.id);
+      
       // Upload the avatar
       const filename = `${user.id}_${Date.now()}`;
-      await uploadAvatar(avatar, filename);
-      const avatarUrl = getAvatarUrl(filename);
+      console.log('Caricamento avatar con filename:', filename);
       
-      // Create the profile linking it to the authenticated user
-      const profile = await createProfile({ 
-        name, 
-        avatar_url: avatarUrl,
-        user_id: user.id,  // Associate with authenticated user
-        color: '#' + Math.floor(Math.random()*16777215).toString(16) // Random color
-      });
-      
-      // Redirect to the partner selection page
-      router.push('/select-partner');
+      try {
+        await uploadAvatar(avatar, filename);
+        const avatarUrl = getAvatarUrl(filename);
+        console.log('Avatar caricato con successo, URL:', avatarUrl.substring(0, 50) + '...');
+        
+        // Create the profile linking it to the authenticated user
+        try {
+          console.log('Tentativo di creazione profilo con user_id:', user.id);
+          const profile = await createProfile({ 
+            name, 
+            avatar_url: avatarUrl,
+            user_id: user.id,  // Associate with authenticated user
+            color: '#' + Math.floor(Math.random()*16777215).toString(16) // Random color
+          });
+          
+          console.log('Profilo creato con successo:', profile);
+          
+          // Redirect to the partner selection page
+          router.push('/select-partner');
+        } catch (profileError) {
+          console.error('Errore specifico nella creazione del profilo:', profileError);
+          setError(`Errore nella creazione del profilo: ${profileError.message || 'Errore sconosciuto'}`);
+        }
+      } catch (avatarError) {
+        console.error('Errore nel caricamento dell\'avatar:', avatarError);
+        setError(`Errore nel caricamento dell'immagine: ${avatarError.message || 'Errore sconosciuto'}`);
+      }
     } catch (err) {
-      console.error('Profile creation error:', err);
+      console.error('Errore generale durante la creazione del profilo:', err);
       setError(`Errore: ${err.message || 'Errore durante la creazione del profilo'}`);
     } finally {
       setLoading(false);
