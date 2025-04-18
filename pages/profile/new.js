@@ -45,7 +45,7 @@ export default function NewProfile() {
         </div>
         <button
           type="submit"
-          className="w-full py-3 rounded-xl bg-primary text-white font-bold text-lg shadow hover:bg-primary/90 transition"
+          className="w-full py-3 rounded-xl bg-blue-500 text-white font-bold text-lg shadow hover:bg-blue-600 transition"
           disabled={loading}
         >
           {loading ? 'Creazione...' : 'Crea profilo'}

@@ -33,7 +33,7 @@ export default function AvatarUpload({ profileId, onUpload }) {
         className="hidden"
       />
       <button
-        className="px-3 py-1 bg-primary text-white rounded shadow hover:bg-primary/80"
+        className="px-3 py-1 bg-blue-500 text-white rounded shadow hover:bg-blue-600"
         onClick={() => fileInput.current.click()}
         disabled={loading}
         type="button"
