@@ -46,10 +46,13 @@ export default function ProfilePage() {
     setError('');
     
     try {
-      await deleteProfile(id);
+      console.log('Deleting profile with ID:', id);
+      const result = await deleteProfile(id);
+      console.log('Delete result:', result);
       router.push('/');
     } catch (err) {
-      setError('Errore durante eliminazione del profilo');
+      console.error('Error deleting profile:', err);
+      setError(`Errore durante eliminazione del profilo: ${err.message || 'Errore sconosciuto'}`);
       setIsDeleting(false);
       setShowDeleteConfirm(false);
     }
