@@ -20,14 +20,21 @@ export default function Register() {
       return;
     }
     
-    // Email verification removed to allow any email
-    
     setLoading(true);
     setError('');
     
     try {
-      await signUp(email, password);
-      router.push('/login?registered=true');
+      const { user } = await signUp(email, password);
+      
+      // Dopo la registrazione, reindirizza direttamente alla pagina di creazione del profilo
+      // invece di andare alla pagina di login
+      if (user) {
+        // Al momento della registrazione, l'utente viene automaticamente loggato
+        router.push('/create-profile');
+      } else {
+        // Se la registrazione non comporta login immediato (es. con conferma email)
+        router.push('/login?registered=true');
+      }
     } catch (err) {
       console.error('Register error:', err);
       // Show detailed error message
